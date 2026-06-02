@@ -3,6 +3,7 @@
 负责从数据库查询数据，整理成报告
 """
 from datetime import date, timedelta
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.db.crud import TransactionCRUD
 
@@ -45,22 +46,41 @@ class StatisticsService:
             "categories": categories
         }
     
-    def get_monthly_report(self, user_id: str) -> dict:
+    def get_monthly_report(self, user_id: str, month: Optional[int] = None) -> dict:
         """
-        生成本月报告
+        生成本月报告（或指定月份）
+        
+        参数：
+        - user_id: 用户ID
+        - month: 月份，1-12，不传就是本月
         """
         today = date.today()
-        # 本月1号
-        first_day = today.replace(day=1)
+        
+        if month is None:
+            month = today.month
+            year = today.year
+        else:
+            year = today.year
+        
+        first_day = date(year, month, 1)
+        
+        # 最后一天
+        if month == today.month and year == today.year:
+            last_day = today
+        else:
+            if month == 12:
+                last_day = date(year, 12, 31)
+            else:
+                last_day = date(year, month + 1, 1) - timedelta(days=1)
         
         # 查询分类汇总
-        categories = self.crud.get_category_summary(user_id, first_day, today)
+        categories = self.crud.get_category_summary(user_id, first_day, last_day)
         
         # 计算总支出
         total = sum(c['total'] for c in categories)
         
         return {
-            "period": f"{first_day} ~ {today}",
+            "period": f"{first_day} ~ {last_day}",
             "total": round(total, 2),
             "categories": categories
         }

@@ -73,14 +73,26 @@ class MessageParser:
             return {"intent": "query_week"}
         
         # 月统计
-        if any(kw in text for kw in ["/month", "/月统计", "月统计", "本月", "这个月"]):
+        if any(kw in text for kw in ["/月统计", "月统计"]):
+            match = re.search(r'/月统计\s*/?(\d{1,2})?月?', text)
+            if match and match.group(1):
+                month = int(match.group(1))
+                return {"intent": "query_month", "month": month}
             return {"intent": "query_month"}
-        
+       
+        if any(kw in text for kw in ["/month", "本月", "这个月"]):
+            return {"intent": "query_month"}
+       
         # 分类统计，比如 "/餐饮统计" 或 "餐饮统计"
         match = re.search(r'[/]?(\S+)统计', text)
         if match:
             cat = match.group(1)
             return {"intent": "query_category", "category": cat}
+                
+        # 检查是否多行（多条记录）
+        lines = [l.strip() for l in text.split('\n') if l.strip()]
+        if len(lines) > 1:
+            return {"intent": "batch_record", "lines": lines}
         
         # 如果包含数字，认为是要记账
         if cls._has_amount(text):
