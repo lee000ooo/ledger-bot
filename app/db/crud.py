@@ -88,7 +88,19 @@ class TransactionCRUD:
             self.db.commit()
             return True
         return False
-    
+
+    def delete_all(self, user_id: str) -> int:
+        """
+        删除用户所有记录
+        
+        返回：删除的条数
+        """
+        count = self.db.query(Transaction)\
+            .filter(Transaction.user_id == user_id)\
+            .delete()
+        self.db.commit()
+        return count
+
     # ========== 统计查询 ==========
     
     def get_week_expenses(self, user_id: str) -> List[Transaction]:

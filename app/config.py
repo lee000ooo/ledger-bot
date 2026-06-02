@@ -24,5 +24,12 @@ class Settings:
     APP_NAME: str = "智能记账助手"
     VERSION: str = "1.0.0"
 
+    # 飞书
+    FEISHU_APP_ID: str = os.getenv("FEISHU_APP_ID", "")
+    FEISHU_APP_SECRET: str = os.getenv("FEISHU_APP_SECRET", "")
+
+
+
+
 # 创建一个全局实例，其他文件直接导入这个就能用
 settings = Settings()

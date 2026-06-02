@@ -6,6 +6,7 @@
 import re
 from decimal import Decimal
 from typing import Optional
+from datetime import date, datetime, timedelta
 
 class MessageParser:
     """消息解析器"""
@@ -62,6 +63,10 @@ class MessageParser:
         # 删除
         if text in ["/delete", "删除", "撤销", "撤回", "删掉", "/删除"]:
             return {"intent": "delete"}
+                
+        # 删除所有记录
+        if text in ["/清空", "/删除全部", "/删除所有"]:
+            return {"intent": "delete_all"}
         
         # 周统计
         if any(kw in text for kw in ["/week", "/周统计", "周统计", "本周", "这周"]):
@@ -107,11 +112,15 @@ class MessageParser:
         
         # 3. 提取备注
         note = cls._extract_note(text)
+
+        # 4. 提取日期
+        transaction_date = cls._extract_date(text)
         
         return {
             "amount": amount,
             "category": category,
-            "note": note
+            "note": note,
+            "transaction_date": transaction_date
         }
     
     @classmethod
@@ -178,4 +187,40 @@ class MessageParser:
         note = re.sub(r'\s+', ' ', note)
         # 去掉首尾空格
         note = note.strip()
+        # 去掉日期指令（/昨天、/前天、/6-1、/2026-05-30）
+        note = re.sub(r'/(昨天|前天|\d{4}-\d{1,2}-\d{1,2}|\d{1,2}-\d{1,2})', '', note)
         return note
+
+    @classmethod
+    def _extract_date(cls, text: str) -> date:
+        """
+        提取日期
+        
+        支持格式：
+        - /昨天  → 昨天
+        - /前天  → 前天
+        - /6-1   → 今年6月1日
+        - /2026-05-30 → 指定完整日期
+        
+        没有日期指令 → 今天
+        """
+        today = date.today()
+        
+        if "/昨天" in text:
+            return today - timedelta(days=1)
+        
+        if "/前天" in text:
+            return today - timedelta(days=2)
+        
+        match = re.search(r'/(\d{4})-(\d{1,2})-(\d{1,2})', text)
+        if match:
+            y, m, d = int(match.group(1)), int(match.group(2)), int(match.group(3))
+            return date(y, m, d)
+        
+        match = re.search(r'/(\d{1,2})-(\d{1,2})', text)
+        if match:
+            m, d = int(match.group(1)), int(match.group(2))
+            return date(today.year, m, d)
+        
+        return today
+
