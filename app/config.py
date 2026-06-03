@@ -15,7 +15,9 @@ class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./ledger.db")
     
     # 企业微信
+    WECOM_CORP_ID: str = os.getenv("WECOM_CORP_ID", "")
     WECOM_TOKEN: str = os.getenv("WECOM_TOKEN", "")
+    WECOM_ENCODING_AES_KEY: str = os.getenv("WECOM_ENCODING_AES_KEY", "")
     
     # AI（暂时不用）
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
