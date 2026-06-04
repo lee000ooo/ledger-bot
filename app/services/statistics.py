@@ -39,11 +39,15 @@ class StatisticsService:
         
         # 计算总支出
         total = sum(c['total'] for c in categories)
+
+        # 查询明细
+        details = self.crud.get_expenses_by_date(user_id, monday, sunday)
         
         return {
             "period": f"{monday} ~ {sunday}",
             "total": round(total, 2),
-            "categories": categories
+            "categories": categories,
+            "details": details
         }
     
     def get_monthly_report(self, user_id: str, month: Optional[int] = None) -> dict:
@@ -78,11 +82,15 @@ class StatisticsService:
         
         # 计算总支出
         total = sum(c['total'] for c in categories)
+
+        # 查询明细
+        details = self.crud.get_expenses_by_date(user_id, first_day, last_day)
         
         return {
             "period": f"{first_day} ~ {last_day}",
             "total": round(total, 2),
-            "categories": categories
+            "categories": categories,
+            "details": details
         }
     
     def get_category_report(self, user_id: str, category: str) -> dict:

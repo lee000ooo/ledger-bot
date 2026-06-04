@@ -216,3 +216,35 @@ class TransactionCRUD:
             }
             for r in results
         ]
+
+    def get_expenses_by_date(
+        self, user_id: str, start_date: date, end_date: date
+    ) -> List[dict]:
+        """
+        按日期查询支出明细
+        
+        返回示例：
+        [
+            {"date": "2026-06-03", "amount": -68.00, "category": "餐饮", "note": "肯德基"},
+            ...
+        ]
+        """
+        results = self.db.query(Transaction)\
+            .filter(
+                Transaction.user_id == user_id,
+                Transaction.transaction_date >= start_date,
+                Transaction.transaction_date <= end_date,
+                Transaction.amount < 0
+            )\
+            .order_by(Transaction.transaction_date.desc())\
+            .all()
+        
+        return [
+            {
+                "date": str(r.transaction_date),
+                "amount": float(r.amount),
+                "category": r.category or "其他",
+                "note": r.note or ""
+            }
+            for r in results
+        ]

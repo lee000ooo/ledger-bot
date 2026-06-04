@@ -94,6 +94,17 @@ class MessageFormatter:
         # 日均
         daily_avg = report['total'] / 7
         lines.append(f"📈 日均：¥{daily_avg:.2f}")
+
+        # 添加明细
+        if report.get('details'):
+            lines.append("")
+            lines.append("📝 支出明细：")
+            for i, d in enumerate(report['details'], 1):
+                emoji = cls.CATEGORY_EMOJI.get(d['category'], '📌')
+                date_short = d['date'][5:]  # 只显示月-日
+                amount = abs(d['amount'])
+                note = f" - {d['note']}" if d['note'] else ""
+                lines.append(f"  {i}. {emoji} {date_short} ¥{amount:.2f} {d['category']}{note}")
         
         return "\n".join(lines)
     
@@ -137,6 +148,17 @@ class MessageFormatter:
             daily_avg = report['total'] / days_passed
             lines.append(f"📈 日均：¥{daily_avg:.2f}")
         
+        # 添加明细
+        if report.get('details'):
+            lines.append("")
+            lines.append("📝 支出明细：")
+            for i, d in enumerate(report['details'], 1):
+                emoji = cls.CATEGORY_EMOJI.get(d['category'], '📌')
+                date_short = d['date'][5:]  # 只显示月-日
+                amount = abs(d['amount'])
+                note = f" - {d['note']}" if d['note'] else ""
+                lines.append(f"  {i}. {emoji} {date_short} ¥{amount:.2f} {d['category']}{note}")
+
         return "\n".join(lines)
     
     @classmethod
